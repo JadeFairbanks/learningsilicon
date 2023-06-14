@@ -1,0 +1,17 @@
+.navbar.bg-primary {
+    background-color: #091F16 !important;
+}
+
+#main-nav {
+    position: relative;
+    height:30rem;
+}
+
+#binaryCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
