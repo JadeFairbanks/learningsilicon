@@ -1,7 +1,7 @@
 const canvas = document.getElementById('binaryCanvas');
 const ctx = canvas.getContext('2d');
 const binary = '10';
-const BLOBS_TO_MAKE = 30;
+const BLOBS_TO_MAKE = 5;
 var binaryRows = [];
 var colorBlobs = [];
 
@@ -56,6 +56,9 @@ function updateBinaryObject(coords, rgbaColor, isBlobArg) {
 
     binaryRows[y][x].color = rgbaColor;
     binaryRows[y][x].isBlob = isBlobArg;
+    if(randNum(0,10) == 1){
+        binaryRows[y][x].value = binary.charAt(randNum(0, binary.length-1));
+    }
 }
 
 
@@ -90,8 +93,10 @@ function createBlob(){
             if (!tooClose) {
                 //binaryRows[testCords[1]][testCords[0]].isBlob = true;
                 //binaryRows[testCords[1]][testCords[0]].color = '#CB00EF';
+                //updateBinaryObject(testCords,'rgba(0, 0, 0, 1)',true)  
                 return {
                     lifeSpan: 0,
+                    markedForElimination: false,
                     BlobCords: [testCords]
                 }
                 
@@ -102,6 +107,17 @@ function createBlob(){
 
 function updateBlobs(){
     for(let i = 0; i < colorBlobs.length; i++){
+        if(colorBlobs[i].markedForElimination == true){
+            
+                let removedCords = colorBlobs[i].BlobCords.pop();
+                if(removedCords == undefined){
+                    colorBlobs[i] = createBlob();
+                }else{
+                    updateBinaryObject(removedCords,interpolateColors('rgba(0, 173, 72, 1)', 'rgba(10, 210, 87, 1)'),false) 
+                }
+                
+          
+        }else{
         colorBlobs[i].lifeSpan++;
         let killBlob = false;
         if(randNum(0, 10000) <= colorBlobs[i].lifeSpan){
@@ -110,7 +126,8 @@ function updateBlobs(){
         
         let thisBlobLongestX = 0;
         let thisBlobLongestY = 0;
-        let longestRow, longestColumn;
+        let longestRow = 0
+        let longestColumn = 0;
 
         // Get the longest X and Y chains
         for(let j = 0; j < colorBlobs[i].BlobCords.length; j++){
@@ -124,8 +141,8 @@ function updateBlobs(){
             }
         }
         
-        // 1 in 2 chance to expand the blob
-        if(randNum(0,1) === 0){
+        // 1 in 3 chance to expand the blob
+        if(randNum(0,2) === 0){
             let newCoords;
             // 70% chance to expand along the longest chain of X or Y
             if(randNum(0, 100) < 70){
@@ -152,15 +169,15 @@ function updateBlobs(){
         }
 
         for(let j = 0; j < colorBlobs[i].BlobCords.length; j++){
-            if(killBlob){
-                updateBinaryObject(colorBlobs[i].BlobCords[j],interpolateColors('rgba(0, 173, 72, 1)', 'rgba(10, 210, 87, 1)'),false) 
-            }else{
-                updateBinaryObject(colorBlobs[i].BlobCords[j],interpolateColors('rgba(29, 234, 94, 1)', 'rgba(123, 234, 234, 1)'),true)  
-            }
+            
+            updateBinaryObject(colorBlobs[i].BlobCords[j],interpolateColors('rgba(255, 255, 255, 1)', 'rgba(255, 255, 255, 1)'),true)  
+            
         }
         if(killBlob){
-            colorBlobs[i] = createBlob()
+            
+            colorBlobs[i].markedForElimination = true;
         }
+    }
     }
 }
 
@@ -221,8 +238,10 @@ function draw() {
 
     for (let i = 0; i < binaryRows.length; i++) {
         for (let j = 0; j < binaryRows[i].length; j++) {
+            /*if(!binaryRows[i][j].isBlob && randNum(0,5) == 0){
+                binaryRows[i][j].color = interpolateColors('rgba(0, 173, 72, 1)', 'rgba(10, 210, 87, 1)')
+            }*/
             var thisNum = binaryRows[i][j];
-            
             ctx.fillStyle = thisNum.color; 
             ctx.fillText(thisNum.value, j * fontSize, i * fontSize);
             
